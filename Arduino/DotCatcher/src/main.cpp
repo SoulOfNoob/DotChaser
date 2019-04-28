@@ -1,55 +1,52 @@
 #include <Arduino.h>
+#include <EasyButton.h>
+#include <FastLED.h>
+#include <DCEngine.h>
 
-// constants won't change. They're used here to set pin numbers:
-const int buttonPin = 23;    // the number of the pushbutton pin
-const int ledPin = 2;      // the number of the LED pin
+#define LED_PIN     2
+#define DATA_PIN    4
+#define NUM_LEDS    64
+const int fieldSize = 32;
+const int fieldOffset = 1;
+const int buttonPins[] = {23, 22};
 
-// Variables will change:
-int ledState = HIGH;         // the current state of the output pin
-int buttonState;             // the current reading from the input pin
-int lastButtonState = LOW;   // the previous reading from the input pin
+DCEngine engine(DATA_PIN, NUM_LEDS, fieldSize, fieldOffset);
 
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 10;    // the debounce time; increase if the output flickers
+// Instance of the button.
+EasyButton *buttons[sizeof(buttonPins)];
+
+// Callback function to be called when the button is pressed.
+void onPressed1() { engine.buttonPressed(1); }
+void onPressed2() { engine.buttonPressed(2); }
+void onPressed3() { engine.buttonPressed(3); }
+void onPressed4() { engine.buttonPressed(4); }
+
+typedef void (*callbackList[])();
+callbackList callbacks = { onPressed1, onPressed2, onPressed3, onPressed4 };
 
 void setup() {
-  pinMode(buttonPin, INPUT);
-  pinMode(ledPin, OUTPUT);
+	// Initialize Serial for debuging purposes.
+	Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
 
-  // set initial LED state
-  digitalWrite(ledPin, ledState);
+  for ( int i = 0 ; i <= sizeof(buttonPins) ; i++ ) {
+    // Instance of the button.
+    buttons[i] = new EasyButton(buttonPins[i]);
+    // Initialize the button.
+    buttons[i]->begin();
+    // Add the callback function to be called when the button is pressed.
+    buttons[i]->onPressed(callbacks[i]);
+  }
+
+  //engine.addButton(button1);
 }
 
 void loop() {
-  // read the state of the switch into a local variable:
-  int reading = digitalRead(buttonPin);
-
-  // If the switch changed, due to noise or pressing:
-  if (reading != lastButtonState) {
-    // reset the debouncing timer
-    lastDebounceTime = millis();
+  EVERY_N_MILLISECONDS( 50 ) {
+    engine.update();
+  }
+  for ( int i = 0 ; i <= sizeof(buttonPins) ; i++ ) {
+    buttons[i]->read();
   }
 
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
-
-    // if the button state has changed:
-    if (reading != buttonState) {
-      buttonState = reading;
-
-      // only toggle the LED if the new button state is HIGH
-      if (buttonState == HIGH) {
-        ledState = !ledState;
-      }
-    }
-  }
-
-  // set the LED:
-  digitalWrite(ledPin, ledState);
-
-  // save the reading. Next time through the loop, it'll be the lastButtonState:
-  lastButtonState = reading;
 }
