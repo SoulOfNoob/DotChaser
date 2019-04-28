@@ -4,7 +4,7 @@
 #include <Player.h>
 #include <Item.h>
 #include <Game.h>
-#include <DotCatcherEngine.h>
+#include <DotChaserEngine.h>
 
 // Arduino pin where the button is connected to.
 #define BUTTON1_PIN 23

@@ -1,5 +1,5 @@
 /**
- * Project DotCatcherEngine
+ * Project DotChaserEngine
  * @author Jan Ryklikas
  * @version 0.1
  */

@@ -1,7 +1,7 @@
 {
 	"_type": "Project",
 	"_id": "AAAAAAFF+h6SjaM2Hec=",
-	"name": "DotCatcherEngine",
+	"name": "DotChaserEngine",
 	"ownedElements": [
 		{
 			"_type": "UMLModel",
@@ -1493,7 +1493,7 @@
 											"top": 103,
 											"width": 191,
 											"height": 13,
-											"text": "DotCatcherEngine"
+											"text": "DotChaserEngine"
 										},
 										{
 											"_type": "LabelView",
@@ -1701,7 +1701,7 @@
 											"top": 239,
 											"width": 191,
 											"height": 13,
-											"text": "+DotCatcherEngine()",
+											"text": "+DotChaserEngine()",
 											"horizontalAlignment": 0
 										},
 										{
@@ -2481,7 +2481,7 @@
 					"_parent": {
 						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
 					},
-					"name": "DotCatcherEngine",
+					"name": "DotChaserEngine",
 					"attributes": [
 						{
 							"_type": "UMLAttribute",
@@ -2569,7 +2569,7 @@
 							"_parent": {
 								"$ref": "AAAAAAFqX+Jvl2YFhMk="
 							},
-							"name": "DotCatcherEngine"
+							"name": "DotChaserEngine"
 						},
 						{
 							"_type": "UMLOperation",
