@@ -13,11 +13,18 @@
 
   class Item {
     public:
+
+      Item(CRGB color, int position, int value);
+
+      void getColor();
+
+      void getPosition();
+
+      void getValue();
+    private:
       CRGB color;
       int position;
       int value;
-
-      Item(CRGB color, int position, int value);
   };
 
 #endif //_ITEM_H

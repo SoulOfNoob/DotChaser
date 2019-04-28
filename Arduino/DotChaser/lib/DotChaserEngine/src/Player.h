@@ -15,14 +15,20 @@
 
   class Player {
     public:
+
       CRGB color;
       int position;
       int direction;
       int length;
       int brightness;
+      //EasyButton button;
       int points;
-      Item *items[255];
+      //Item items[255];
 
+      /**
+       * @param position
+       * @param button
+       */
       Player();
 
       void changeDirection();
