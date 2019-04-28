@@ -10,7 +10,7 @@ const int fieldSize = 32;
 const int fieldOffset = 1;
 const int buttonPins[] = {23, 22};
 
-DCEngine engine(DATA_PIN, NUM_LEDS, fieldSize, fieldOffset);
+DCEngine engine(DATA_PIN, NUM_LEDS, fieldSize, fieldOffset, 1000);
 
 // Instance of the button.
 EasyButton *buttons[sizeof(buttonPins)];
@@ -43,10 +43,10 @@ void setup() {
 
 void loop() {
   EVERY_N_MILLISECONDS( 50 ) {
-    engine.update();
+
   }
   for ( int i = 0 ; i <= sizeof(buttonPins) ; i++ ) {
     buttons[i]->read();
   }
-
+	engine.update();
 }

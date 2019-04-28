@@ -7,37 +7,14 @@
 
 #include "DCEngine.h"
 
-/**
- * DCEngine implementation
- */
-DCEngine::DCEngine(int data_pin, int num_leds, int size, int offset) {
+DCEngine::DCEngine(int data_pin, int num_leds, int size, int offset, int speed) {
   fieldOffset           = offset;
   fieldSize             = size;
-  configmode            = false;
-  players[MAX_PLAYERS]  = {nullptr};
-  buttons[MAX_PLAYERS]  = {nullptr};
-  game                  = {nullptr};
+  gameSpeed             = speed;
 
   FastLED.addLeds<WS2812,4,GRB>(leds, num_leds).setCorrection(TypicalLEDStrip);
 }
 
-/**
- * @param button
- */
-void DCEngine::addButton(EasyButton *button) {
-
-}
-
-/**
- * @param player
- */
-void DCEngine::addPlayer(Player *player) {
-
-}
-
-/**
- * @param game
- */
 void DCEngine::addGame(Game *game) {
 
 }
@@ -57,16 +34,7 @@ void DCEngine::drawPlayers() {
   FastLED.clear();
   for ( int i = 0 ; i < MAX_PLAYERS ; i++ ) {
     if ( players[i] != 0 ) {
-
       movePlayer(players[i]);
-
-      Serial.print("DrawPlayer: ");
-      Serial.print(i);
-      Serial.print(" Pos: ");
-      Serial.print(players[i]->position);
-      Serial.print(" Color: ");
-      Serial.print(players[i]->color);
-      Serial.println();
 
       leds[players[i]->position] = players[i]->color;
     }
@@ -87,7 +55,6 @@ void DCEngine::buttonPressed(int button) {
     players[button] = new Player();
     players[button]->color = CHSV(random8(),255,255);
     players[button]->position = random(fieldOffset, fieldSize + fieldOffset);
-    //Serial.println(players[button]);
   } else {
     Serial.println("check Collision");
     //if collision
@@ -102,9 +69,15 @@ void DCEngine::buttonPressed(int button) {
 }
 
 void DCEngine::update() {
-  //if (configmode) showField();
-  drawPlayers();
-  render();
+  EVERY_N_MILLISECONDS( gameSpeed ) {
+    //if (configmode) showField();
+    drawPlayers();
+    render();
+  }
+
+  EVERY_N_MILLISECONDS( 1000 ) {
+    //speed -= 10;
+  }
 }
 
 void DCEngine::render() {
@@ -113,8 +86,7 @@ void DCEngine::render() {
 }
 
 
-float DCEngine::preventOverflow(float value, float minimum, float maximum)
-	{
+float DCEngine::preventOverflow(float value, float minimum, float maximum) {
 	  if(value < minimum) {
 	    return minimum;
 	  } else if(value > maximum) {
@@ -124,8 +96,7 @@ float DCEngine::preventOverflow(float value, float minimum, float maximum)
 	  }
 	}
 
-float DCEngine::doOverflow(float value, float minimum, float maximum)
-{
+float DCEngine::doOverflow(float value, float minimum, float maximum) {
   if(value > maximum) {
     return (minimum - 1)  + (value - maximum);
   } else if(value < minimum) {

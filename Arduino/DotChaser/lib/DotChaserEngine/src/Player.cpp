@@ -7,15 +7,6 @@
 
 #include "Player.h"
 
-/**
- * Player implementation
- */
-
-
-/**
- * @param position
- * @param button
- */
 Player::Player() {
   direction   = 1;
   length      = 1;

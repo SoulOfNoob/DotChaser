@@ -8,47 +8,29 @@
 #ifndef _GAME_H
 #define _GAME_H
 
-#include <Arduino.h>
-#include <FastLED.h>
-#include <Game.h>
-#include <Player.h>
-#include <Item.h>
+  #define MAX_PLAYERS 4
 
-class Game {
-public:
+  #include <Arduino.h>
+  #include <FastLED.h>
+  #include <Game.h>
+  #include <Player.h>
+  #include <Item.h>
 
-/**
- * @param time
- * @param size
- * @param players
- */
-Game(double time, int size, Player *players[4]);
+  class Game {
+  public:
+    double time;
+    int fieldSize;
+    Player *players[MAX_PLAYERS];
+    Item *items[255];
+    int playerField[255];
+    int itemField[255];
 
-/**
- * item collision and player collision
- *
- * @param player
- */
-void checkCollision(Player *player);
+  Game(double time, int size, Player *players[MAX_PLAYERS]);
 
-void update();
-private:
-   /**
-   * remaining time
-   * initial time counts down
-   */
-  double time;
-  int fieldSize;
-  Player *players[4];
-  Item *items[255];
-  /**
-  * array with all player positions? to check collisions
-  */
-  int playerField[255];
-  /**
-  * array with all item positions? to check collisions
-  */
-  int itemField[255];
-};
+  void checkCollision(Player *player);
+
+  void update();
+
+  };
 
 #endif //_GAME_H
