@@ -11,7 +11,6 @@
   #include <Arduino.h>
   #include <FastLED.h>
   #include <Item.h>
-  #include <EasyButton.h>
 
   class Player {
     public:
@@ -21,14 +20,9 @@
       int direction;
       int length;
       int brightness;
-      //EasyButton button;
       int points;
-      //Item items[255];
+      Item *items[16];
 
-      /**
-       * @param position
-       * @param button
-       */
       Player();
 
       void changeDirection();

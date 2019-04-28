@@ -11,6 +11,12 @@
  * Item implementation
  */
 
-Item::Item(CRGB color, int position, int value) {
+
+/**
+ * @param color
+ * @param position
+ * @param value
+ */
+void Item::Item(CRGB color, int position, int value) {
 
 }

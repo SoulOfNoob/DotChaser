@@ -18,20 +18,30 @@
 
   class DCEngine {
     public:
-      bool configmode;
-      int fieldSize;
-      int fieldOffset;
-      Game *game;
-      Player *players[MAX_PLAYERS];
-      int speed;
-      EasyButton *buttons[MAX_PLAYERS];
+      bool configmode                  = false;
+      int fieldSize                    = 0;
+      int fieldOffset                  = 0;
+      int gameSpeed                    = 1000;
+      Game *game                       = {nullptr};
+      Player *players[MAX_PLAYERS]     = {nullptr};
+      EasyButton *buttons[MAX_PLAYERS] = {nullptr};
       CRGB leds[255];
 
-      // DATA_PIN, NUM_LEDS, LED_TYPE, COLOR_ORDER, fieldSize, fieldOffset
+      /**
+       * @param data_pin
+       * @param num_leds
+       * @param size
+       * @param offset
+       */
       DCEngine(int data_pin, int num_leds, int size, int offset);
 
       void showField();
+
+      /**
+       * @param player
+       */
       void movePlayer(Player *player);
+
       void drawPlayers();
 
       /**
@@ -56,10 +66,20 @@
        */
       void update();
 
-
       void render();
 
+      /**
+       * @param value
+       * @param minimum
+       * @param maximum
+       */
       float preventOverflow(float value, float minimum, float maximum);
+
+      /**
+       * @param value
+       * @param minimum
+       * @param maximum
+       */
       float doOverflow(float value, float minimum, float maximum);
 
   };

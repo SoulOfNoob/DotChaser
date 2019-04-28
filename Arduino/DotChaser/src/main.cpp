@@ -38,15 +38,16 @@ void setup() {
     buttons[i]->onPressed(callbacks[i]);
   }
 
-  //engine.addButton(button1);
+  Serial.println("Setup OK!");
 }
 
 void loop() {
-  EVERY_N_MILLISECONDS( 50 ) {
-    engine.update();
+	EVERY_N_MILLISECONDS( 50 ) {
+
   }
+
   for ( int i = 0 ; i <= sizeof(buttonPins) ; i++ ) {
     buttons[i]->read();
   }
-
+	engine.update();
 }
