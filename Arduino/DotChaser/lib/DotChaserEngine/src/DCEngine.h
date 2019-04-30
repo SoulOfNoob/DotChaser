@@ -36,44 +36,16 @@
       CRGB leds[255];
 
       void drawField();
-
-      /**
-       * @param player
-       */
       void movePlayer(Player *player);
-
       void drawPlayers();
-
-      /**
-       * @param game
-       */
       void addGame(Game *game);
-
       int playerExists(int id);
       void addPlayer(int id);
       int checkCollision(int id);
-
-      /**
-       * @param button
-       */
       void buttonPressed(int button);
-
       void update();
-
       void render();
-
-      /**
-       * @param value
-       * @param minimum
-       * @param maximum
-       */
       float preventOverflow(float value, float minimum, float maximum);
-
-      /**
-       * @param value
-       * @param minimum
-       * @param maximum
-       */
       float doOverflow(float value, float minimum, float maximum);
 
   };

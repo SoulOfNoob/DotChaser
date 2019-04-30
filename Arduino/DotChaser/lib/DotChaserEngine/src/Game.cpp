@@ -64,6 +64,9 @@ void Game::update() {
 
 void Game::_playerCollide(Player* player1, Player* player2) {
   Serial.println("Player Collision detected!!");
+  //ToDo Getter Setter Methods
+  player1->color = CRGB::Green;
+  player2->color = CRGB::Red;
   //do Collision
 }
 
