@@ -17,12 +17,16 @@ Game::Game(Player** players, Item** items) {
 }
 
 void Game::playerButtonPressed(int playerID) {
-  if (!checkPlayerCollision(playerID) && !checkItemCollision(playerID)) {
+  if (!_checkPlayerCollision(playerID) && !_checkItemCollision(playerID)) {
     _players[playerID]->changeDirection();
   }
 }
 
-bool Game::checkPlayerCollision(int playerID) {
+void Game::update() {
+
+}
+
+bool Game::_checkPlayerCollision(int playerID) {
   //check player Collision
   Player *currentPlayer = _players[playerID];
   //iterate players
@@ -31,8 +35,8 @@ bool Game::checkPlayerCollision(int playerID) {
     //check if enemyPlayer is not currentPlayer and is not empty
     if ( i != playerID && enemyPlayer != nullptr ) {
       //check player positions
-      if ( currentPlayer->position == enemyPlayer->position ) {
-        _playerCollide(currentPlayer, enemyPlayer);
+      if ( currentPlayer->getPosition() == enemyPlayer->getPosition() ) {
+        _doPlayerCollision(currentPlayer, enemyPlayer);
         return true;
       }
     }
@@ -40,7 +44,7 @@ bool Game::checkPlayerCollision(int playerID) {
   return false;
 }
 
-bool Game::checkItemCollision(int playerID) {
+bool Game::_checkItemCollision(int playerID) {
   //check item collision
   Player *currentPlayer = _players[playerID];
   //iterate players
@@ -49,8 +53,8 @@ bool Game::checkItemCollision(int playerID) {
     //check if item is not empty
     if ( item != 0 ) {
       //check player/item positions
-      if ( currentPlayer->position == item->position ) {
-        _itemCollide(currentPlayer, item);
+      if ( currentPlayer->getPosition() == item->getPosition() ) {
+        _doItemCollidsion(currentPlayer, item);
         return true;
       }
     }
@@ -58,19 +62,15 @@ bool Game::checkItemCollision(int playerID) {
   return false;
 }
 
-void Game::update() {
-
-}
-
-void Game::_playerCollide(Player* player1, Player* player2) {
+void Game::_doPlayerCollision(Player* player1, Player* player2) {
   Serial.println("Player Collision detected!!");
   //ToDo Getter Setter Methods
-  player1->color = CRGB::Green;
-  player2->color = CRGB::Red;
+  player1->setColor(CRGB::Green);
+  player2->setColor(CRGB::Red);
   //do Collision
 }
 
-void Game::_itemCollide(Player* player, Item* item) {
+void Game::_doItemCollidsion(Player* player, Item* item) {
   Serial.println("Item Collision detected!!");
   //do Collision
 }

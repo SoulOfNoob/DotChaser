@@ -41,15 +41,16 @@
   class Game {
   public:
     Game(Player** players, Item** items);
+
     void playerButtonPressed(int playerID);
-    bool checkPlayerCollision(int playerID);
-    bool checkItemCollision(int playerID);
     void update();
   private:
-    Player** _players;
-    Item** _items;
-    void _playerCollide(Player* player1, Player* player2);
-    void _itemCollide(Player* player, Item* item);
+    Player**  _players;
+    Item**    _items;
+    bool      _checkPlayerCollision(int playerID);
+    bool      _checkItemCollision(int playerID);
+    void      _doPlayerCollision(Player* player1, Player* player2);
+    void      _doItemCollidsion(Player* player, Item* item);
     //int time
   };
 

@@ -13,16 +13,21 @@
 
   class Item {
     public:
-      CRGB color;
-      int position;
-      int value;
-
-      /**
-       * @param color
-       * @param position
-       * @param value
-       */
       Item(CRGB color, int position, int value);
+
+      // public getters
+      int   getPosition();
+      int   getValue();
+      CRGB  getColor();
+
+      // public setters
+      void  setPosition(int position);
+      void  setValue(int value);
+      void  setColor(CRGB color);
+    private:
+      int   _position;
+      int   _value;
+      CRGB  _color;
   };
 
 #endif //_ITEM_H

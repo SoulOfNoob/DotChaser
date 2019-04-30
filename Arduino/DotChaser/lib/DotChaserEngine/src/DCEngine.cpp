@@ -13,75 +13,125 @@
 
 DCEngine::DCEngine(int data_pin, int num_leds, int size, int offset) {
   Serial.begin(115200);
+  Serial.println("--------");
   Serial.println("Construct DCEngine");
 
-  fieldOffset           = offset;
-  fieldSize             = size;
+  _weird             = 666;
+  _fieldOffset       = offset;
+  _fieldSize         = size;
+  _config            = false;
+  _gameSpeed         = 1000;
+  _speedFactor       = 2.03;
+  _speedIndicatorMin = 9;
+  _speedIndicatorMax = 10;
+  _speedIndicator    = 10;
+  _game = new Game(_players, _items);
 
-  Serial.println("--------");
-  Serial.println(weird);
-  Serial.println(fieldOffset);
-  Serial.println(config);
-  Serial.println(fieldSize);
-  Serial.println("--------");
+  _stillWeird();
 
-  FastLED.addLeds<WS2812,4,GRB>(leds, num_leds).setCorrection(TypicalLEDStrip);
-  game = new Game(players, items);
+  FastLED.addLeds<WS2812,4,GRB>(_leds, num_leds).setCorrection(TypicalLEDStrip);
 }
 
-void DCEngine::addGame(Game *game) {
+// public methods
+void DCEngine::addGame(Game *_game) {
 
 }
 
-void DCEngine::drawField() {
-  FastLED.clear();
-  for ( int i = fieldOffset ; i < fieldSize + fieldOffset ; i++ ) {
-    leds[i] = CRGB::Red;
-  }
-}
+void DCEngine::buttonPressed(int id) {
+  Serial.print("Button ");
+  Serial.print(id);
+  Serial.println(" pressed.");
 
-void DCEngine::drawPlayers() {
-  FastLED.clear();
-  for ( int i = 0 ; i < MAX_PLAYERS ; i++ ) {
-    if ( players[i] != 0 ) {
-      movePlayer(players[i]);
-      leds[players[i]->position] = players[i]->color;
-      // Serial.print("DrawPlayer: ");
-      // Serial.print(i);
-      // Serial.print(" Pos: ");
-      // Serial.print(players[i]->position);
-      // Serial.print(" Color: ");
-      // Serial.print(players[i]->color);
-      // Serial.println();
+  _stillWeird();
+
+  if (_config) {
+    if ( id == 1 ) {
+      _fieldSize--;
+    } else if (id == 2) {
+      _fieldSize++;
+    }
+    Serial.print(" _fieldSize: ");
+    Serial.println(_fieldSize);
+  } else {
+    if (_playerExists(id)) {
+      _game->playerButtonPressed(id);
+    } else {
+      _addPlayer(id);
     }
   }
 }
 
 void DCEngine::update() {
   EVERY_N_MILLISECONDS( 1000 ) {
-    speedIndicator--;
-    gameSpeed = round(pow(preventOverflow(speedIndicator, speedIndicatorMin, speedIndicatorMax), speedFactor) + 30);
+    _speedIndicator--;
+    _gameSpeed = round(pow(_preventOverflow(_speedIndicator, _speedIndicatorMin, _speedIndicatorMax), _speedFactor) + 30);
     //Serial.println(gameSpeed);
   }
 
-  EVERY_N_MILLIS_I(thistimer, gameSpeed) {
-    if (config == 1) {
-      drawField();
+  EVERY_N_MILLIS_I(thistimer, _gameSpeed) {
+    if (_config) {
+      _drawField();
     } else {
-      drawPlayers();
+      _drawPlayers();
     }
-    render();
+    _render();
   }
-  thistimer.setPeriod(gameSpeed);
+  thistimer.setPeriod(_gameSpeed);
 }
 
-void DCEngine::render() {
+// public setters
+void DCEngine::setConfigMode(bool configMode) {
+
+}
+
+// private player methods
+void DCEngine::_addPlayer(int id) {
+  Serial.print("Add Player ");
+  Serial.println(id);
+  _players[id] = new Player();
+  _players[id]->setColor(CHSV(random8(),255,255));
+  _players[id]->setPosition(random(_fieldOffset, _fieldSize + _fieldOffset));
+  _drawPlayers();
+  //Serial.println(players[button]);
+}
+
+bool DCEngine::_playerExists(int id) {
+  if (_players[id] == 0 && id < MAX_PLAYERS) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+void DCEngine::_movePlayer(Player *player) {
+  player->setPosition(_doOverflow(player->getPosition() + player->getDirection(), _fieldOffset, _fieldSize - 1 + _fieldOffset));
+}
+
+// private graphic methods
+void DCEngine::_render() {
   FastLED.setBrightness(5);
   FastLED.show();
 }
 
-float DCEngine::preventOverflow(float value, float minimum, float maximum)
-	{
+void DCEngine::_drawField() {
+  FastLED.clear();
+  for ( int i = _fieldOffset ; i < _fieldSize + _fieldOffset ; i++ ) {
+    _leds[i] = CRGB::Red;
+  }
+}
+
+void DCEngine::_drawPlayers() {
+  FastLED.clear();
+  for ( int i = 0 ; i < MAX_PLAYERS ; i++ ) {
+    if ( _players[i] != 0 ) {
+      _movePlayer(_players[i]);
+      _leds[_players[i]->getPosition()] = _players[i]->getColor();
+    }
+  }
+}
+
+// private helpers
+float DCEngine::_preventOverflow(float value, float minimum, float maximum) {
 	  if(value < minimum) {
 	    return minimum;
 	  } else if(value > maximum) {
@@ -91,8 +141,7 @@ float DCEngine::preventOverflow(float value, float minimum, float maximum)
 	  }
 	}
 
-float DCEngine::doOverflow(float value, float minimum, float maximum)
-{
+float DCEngine::_doOverflow(float value, float minimum, float maximum) {
   if(value > maximum) {
     return (minimum - 1)  + (value - maximum);
   } else if(value < minimum) {
@@ -102,72 +151,9 @@ float DCEngine::doOverflow(float value, float minimum, float maximum)
   }
 }
 
-void DCEngine::movePlayer(Player *player) {
-  player->position = doOverflow(player->position + player->direction, fieldOffset, fieldSize - 1 + fieldOffset);
-}
-
-int DCEngine::playerExists(int id) {
-  Serial.print("playerExists ");
-  Serial.println(id);
-  if (players[id] == 0 && id < MAX_PLAYERS) {
-    return 0;
-    Serial.println("0 ");
-  } else {
-    return 1;
-    Serial.println("1 ");
-  }
-}
-
-void DCEngine::addPlayer(int id) {
-  Serial.print("Add Player ");
-  Serial.println(id);
-  players[id] = new Player();
-  players[id]->color = CHSV(random8(),255,255);
-  players[id]->position = random(fieldOffset, fieldSize + fieldOffset);
-  drawPlayers();
-  //Serial.println(players[button]);
-}
-
-int DCEngine::checkCollision(int id) {
-  Serial.println("check Collision");
-  //if collision
-  if ( 0 ) {
-    return 1;
-  } else {
-    return 0;
-  }
-}
-
-void DCEngine::buttonPressed(int id) {
-  Serial.print("Button ");
-  Serial.print(id);
-  Serial.println(" pressed.");
-
+void DCEngine::_stillWeird() {
   Serial.println("--------");
-  Serial.println(weird);
-  Serial.println(fieldOffset);
-  Serial.println(config);
-  Serial.println(fieldSize);
+  Serial.print("Still Weird? - ");
+  Serial.println(_weird);
   Serial.println("--------");
-
-  if (config == 1) {
-    if ( id == 1 ) {
-      fieldSize--;
-    } else if (id == 2) {
-      fieldSize++;
-    }
-    Serial.print(" size: ");
-    Serial.println(fieldSize);
-  } else {
-    if (playerExists(id)) {
-      game->playerButtonPressed(id);
-      // if (checkCollision(id)) {
-      //   Serial.println("Collision detected!!");
-      // } else {
-      //   players[id]->changeDirection();
-      // }
-    } else {
-      addPlayer(id);
-    }
-  }
 }
