@@ -16,6 +16,7 @@
   #include <EasyButton.h>
   #include <Game.h>
   #include <Player.h>
+  #include <Item.h>
 
   class DCEngine {
     public:
@@ -29,8 +30,9 @@
       int speedIndicatorMin         = 9;
       int speedIndicatorMax         = 10;
       int speedIndicator            = 10;
-      Game *game                    = {nullptr};
-      Player *players[MAX_PLAYERS]  = {nullptr};
+      Player* players[MAX_PLAYERS]  = {nullptr};
+      Item* items[MAX_ITEMS]        = {nullptr};
+      Game* game;
       CRGB leds[255];
 
       void drawField();

@@ -17,11 +17,7 @@ Game::Game(Player** players, Item** items) {
 }
 
 void Game::playerButtonPressed(int playerID) {
-  if (checkPlayerCollision(playerID)) {
-    Serial.println("Player Collision detected!!");
-  } else if (checkItemCollision(playerID)) {
-    Serial.println("Item Collision detected!!");
-  } else {
+  if (!checkPlayerCollision(playerID) && !checkItemCollision(playerID)) {
     _players[playerID]->changeDirection();
   }
 }
@@ -36,6 +32,7 @@ bool Game::checkPlayerCollision(int playerID) {
     if ( i != playerID && enemyPlayer != nullptr ) {
       //check player positions
       if ( currentPlayer->position == enemyPlayer->position ) {
+        _playerCollide(currentPlayer, enemyPlayer);
         return true;
       }
     }
@@ -53,6 +50,7 @@ bool Game::checkItemCollision(int playerID) {
     if ( item != 0 ) {
       //check player/item positions
       if ( currentPlayer->position == item->position ) {
+        _itemCollide(currentPlayer, item);
         return true;
       }
     }
@@ -64,11 +62,12 @@ void Game::update() {
 
 }
 
-
-void Game::_playerCollide(int player1ID, int player2ID) {
-
+void Game::_playerCollide(Player* player1, Player* player2) {
+  Serial.println("Player Collision detected!!");
+  //do Collision
 }
 
-void Game::_itemCollide(int playerID, int itemID) {
-
+void Game::_itemCollide(Player* player, Item* item) {
+  Serial.println("Item Collision detected!!");
+  //do Collision
 }

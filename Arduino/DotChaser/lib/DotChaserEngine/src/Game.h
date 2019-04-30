@@ -48,8 +48,8 @@
   private:
     Player** _players;
     Item** _items;
-    void _playerCollide(int player1ID, int player2ID);
-    void _itemCollide(int playerID, int itemID);
+    void _playerCollide(Player* player1, Player* player2);
+    void _itemCollide(Player* player, Item* item);
     //int time
   };
 

@@ -26,6 +26,7 @@ DCEngine::DCEngine(int data_pin, int num_leds, int size, int offset) {
   Serial.println("--------");
 
   FastLED.addLeds<WS2812,4,GRB>(leds, num_leds).setCorrection(TypicalLEDStrip);
+  game = new Game(players, items);
 }
 
 void DCEngine::addGame(Game *game) {
@@ -159,12 +160,12 @@ void DCEngine::buttonPressed(int id) {
     Serial.println(fieldSize);
   } else {
     if (playerExists(id)) {
-      //game.playerButtonPressed(id);
-      if (checkCollision(id)) {
-        Serial.println("Collision detected!!");
-      } else {
-        players[id]->changeDirection();
-      }
+      game->playerButtonPressed(id);
+      // if (checkCollision(id)) {
+      //   Serial.println("Collision detected!!");
+      // } else {
+      //   players[id]->changeDirection();
+      // }
     } else {
       addPlayer(id);
     }
