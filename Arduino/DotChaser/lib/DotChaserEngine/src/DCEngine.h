@@ -19,7 +19,7 @@
 
   class DCEngine {
     public:
-      DCEngine(int data_pin, int num_leds, int size, int offset);
+      DCEngine(int data_pin, int num_leds, int fieldSize, int fieldOffset);
 
       // public methods
       void    addGame(Game* game);
@@ -30,14 +30,14 @@
       void    setConfigMode(bool configMode);
     private:
       int     _weird;
-      bool    _config;
+      int     _config;
       int     _fieldSize;
       int     _fieldOffset;
       int     _gameSpeed;         //ToDo: move to Game object
       int     _speedIndicatorMin; //ToDo: move to Game object
       int     _speedIndicatorMax; //ToDo: move to Game object
       int     _speedIndicator;    //ToDo: move to Game object
-      float   _speedFactor;       //ToDo: move to Game object
+      float   _speedExponent;     //ToDo: move to Game object
       Player* _players[MAX_PLAYERS] = {nullptr};
       Item*   _items[MAX_ITEMS]     = {nullptr};
       Game*   _game;
@@ -46,12 +46,14 @@
       // private player methods
       void    _addPlayer(int id);
       bool    _playerExists(int id);
-      void    _movePlayer(Player *player);
+      void    _movePlayers();
 
       // private graphic methods
-      void    _render();
       void    _drawField();
       void    _drawPlayers();
+      void    _drawTrace(int position, CRGB color);
+      void    _drawWave(int position, int velocity, CRGB color);
+      void    _render();
 
       // private helpers
       float   _preventOverflow(float value, float minimum, float maximum);

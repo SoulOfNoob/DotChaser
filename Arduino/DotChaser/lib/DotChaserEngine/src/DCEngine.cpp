@@ -11,21 +11,22 @@
  * DCEngine implementation
  */
 
-DCEngine::DCEngine(int data_pin, int num_leds, int size, int offset) {
+DCEngine::DCEngine(int data_pin, int num_leds, int fieldSize, int fieldOffset) {
   Serial.begin(115200);
   Serial.println("--------");
   Serial.println("Construct DCEngine");
 
   _weird             = 666;
-  _fieldOffset       = offset;
-  _fieldSize         = size;
-  _config            = false;
-  _gameSpeed         = 1000;
-  _speedFactor       = 2.03;
-  _speedIndicatorMin = 9;
-  _speedIndicatorMax = 10;
-  _speedIndicator    = 10;
-  _game = new Game(_players, _items);
+  _fieldSize         = fieldSize;
+  _fieldOffset       = fieldOffset;
+  _config            = 0;
+  _gameSpeed         = 400;
+  _speedIndicatorMin = 20;
+  _speedIndicatorMax = 40;
+  _speedIndicator    = 20;
+  _speedExponent     = 2.03;
+
+  _game = new Game(_players, _items, &_fieldSize, &_fieldOffset);
 
   _stillWeird();
 
@@ -44,7 +45,13 @@ void DCEngine::buttonPressed(int id) {
 
   _stillWeird();
 
-  if (_config) {
+  //_drawWave(20, 10, CRGB::Red);
+  if( id == 3 ) {
+    _config = _doOverflow(_config + 1, 0, 2);
+    Serial.print(" _config: ");
+    Serial.println(_config);
+  }
+  if (_config == 1) {
     if ( id == 1 ) {
       _fieldSize--;
     } else if (id == 2) {
@@ -52,7 +59,15 @@ void DCEngine::buttonPressed(int id) {
     }
     Serial.print(" _fieldSize: ");
     Serial.println(_fieldSize);
-  } else {
+  } else if (_config == 2) {
+    if ( id == 1 ) {
+      _fieldOffset--;
+    } else if (id == 2) {
+      _fieldOffset++;
+    }
+    Serial.print(" _fieldOffset: ");
+    Serial.println(_fieldOffset);
+  } else if ( id != 3 ) {
     if (_playerExists(id)) {
       _game->playerButtonPressed(id);
     } else {
@@ -62,21 +77,26 @@ void DCEngine::buttonPressed(int id) {
 }
 
 void DCEngine::update() {
-  EVERY_N_MILLISECONDS( 1000 ) {
-    _speedIndicator--;
-    _gameSpeed = round(pow(_preventOverflow(_speedIndicator, _speedIndicatorMin, _speedIndicatorMax), _speedFactor) + 30);
-    //Serial.println(gameSpeed);
-  }
+  // speedup
+  // EVERY_N_MILLISECONDS( 1000 ) {
+  //   _speedIndicator--;
+  //   _gameSpeed = round(pow(_preventOverflow(_speedIndicator, _speedIndicatorMin, _speedIndicatorMax), _speedExponent) + 30);
+  //   Serial.println(_gameSpeed);
+  // }
 
   EVERY_N_MILLIS_I(thistimer, _gameSpeed) {
-    if (_config) {
-      _drawField();
-    } else {
-      _drawPlayers();
-    }
-    _render();
+    // move player with game speed
+    _movePlayers();
   }
   thistimer.setPeriod(_gameSpeed);
+
+  // but render player as fast as possible
+  if ( _config > 0 ) {
+    _drawField();
+  } else {
+    _drawPlayers();
+  }
+  _render();
 }
 
 // public setters
@@ -103,16 +123,15 @@ bool DCEngine::_playerExists(int id) {
   }
 }
 
-void DCEngine::_movePlayer(Player *player) {
-  player->setPosition(_doOverflow(player->getPosition() + player->getDirection(), _fieldOffset, _fieldSize - 1 + _fieldOffset));
+void DCEngine::_movePlayers() {
+  for ( int i = 0 ; i < MAX_PLAYERS ; i++ ) {
+    if ( _players[i] != 0 ) {
+      _players[i]->setPosition(_doOverflow(_players[i]->getPosition() + _players[i]->getDirection(), _fieldOffset, _fieldSize - 1 + _fieldOffset));
+    }
+  }
 }
 
 // private graphic methods
-void DCEngine::_render() {
-  FastLED.setBrightness(5);
-  FastLED.show();
-}
-
 void DCEngine::_drawField() {
   FastLED.clear();
   for ( int i = _fieldOffset ; i < _fieldSize + _fieldOffset ; i++ ) {
@@ -124,10 +143,38 @@ void DCEngine::_drawPlayers() {
   FastLED.clear();
   for ( int i = 0 ; i < MAX_PLAYERS ; i++ ) {
     if ( _players[i] != 0 ) {
-      _movePlayer(_players[i]);
       _leds[_players[i]->getPosition()] = _players[i]->getColor();
     }
   }
+}
+
+void DCEngine::_drawTrace(int position, CRGB color) {
+  //CHSV color(1, 255, 255);
+  _leds[position]     = color;
+  _leds[position].fadeLightBy( 150 );
+
+  for ( int i = 1 ; i < 4 ; i++ ) {
+    _leds[position - i] = color;
+    _leds[position - i].fadeLightBy( 150 + (25 * i) );
+    _leds[position + i] = color;
+    _leds[position + i].fadeLightBy( 150 + (25 * i) );
+  }
+}
+
+void DCEngine::_drawWave(int position, int velocity, CRGB color) {
+  for ( int i = 0 ; i < 6 ; i++ ) {
+    FastLED.clear();
+    _drawTrace( position + i, color );
+    _drawTrace( position - i, color );
+    //_leds[position] = color;
+    FastLED.show();
+    delay(50);
+  }
+}
+
+void DCEngine::_render() {
+  FastLED.setBrightness(20);
+  FastLED.show();
 }
 
 // private helpers

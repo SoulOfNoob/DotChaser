@@ -9,9 +9,11 @@
 
 const int fieldOffset = 0;
 const int fieldSize = NUM_LEDS - fieldOffset;
-const int buttonPins[] = {23, 22};
+const int buttonPins[] = {23, 22, 21};
 
 DCEngine engine(DATA_PIN, NUM_LEDS, fieldSize, fieldOffset);
+//DCEngine* engine = new DCEngine(DATA_PIN, NUM_LEDS, fieldSize, fieldOffset);
+//DCEngine engine = new DCEngine(DATA_PIN, NUM_LEDS, fieldSize, fieldOffset);
 
 // Instance of the button.
 EasyButton *buttons[sizeof(buttonPins)];

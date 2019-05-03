@@ -40,17 +40,31 @@
 
   class Game {
   public:
-    Game(Player** players, Item** items);
+    Game(Player** players, Item** items, int* fieldSize, int* fieldOffset);
 
     void playerButtonPressed(int playerID);
     void update();
   private:
+    int*      _fieldSize;
+    int*      _fieldOffset;
+    int       _gameSpeed;         //ToDo: move to Game object
+    int       _speedIndicatorMin; //ToDo: move to Game object
+    int       _speedIndicatorMax; //ToDo: move to Game object
+    int       _speedIndicator;    //ToDo: move to Game object
+    float     _speedExponent;     //ToDo: move to Game object
+    int       _collisionTolerance;
     Player**  _players;
     Item**    _items;
+
+    void      _movePlayers();
     bool      _checkPlayerCollision(int playerID);
     bool      _checkItemCollision(int playerID);
     void      _doPlayerCollision(Player* player1, Player* player2);
-    void      _doItemCollidsion(Player* player, Item* item);
+    void      _doItemCollision(Player* player, Item* item);
+
+    // private helpers
+    float     _preventOverflow(float value, float minimum, float maximum);
+    float     _doOverflow(float value, float minimum, float maximum);
     //int time
   };
 
