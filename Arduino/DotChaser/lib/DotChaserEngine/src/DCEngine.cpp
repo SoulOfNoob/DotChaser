@@ -20,9 +20,9 @@ DCEngine::DCEngine(int data_pin, int num_leds, int fieldSize, int fieldOffset) {
   _fieldSize         = fieldSize;
   _fieldOffset       = fieldOffset;
   _config            = 0;
-  _gameSpeed         = 400;
-  _speedIndicatorMin = 20;
-  _speedIndicatorMax = 40;
+  _gameSpeed         = 1000;
+  _speedIndicatorMin = 5;
+  _speedIndicatorMax = 20;
   _speedIndicator    = 20;
   _speedExponent     = 2.03;
 
@@ -78,11 +78,11 @@ void DCEngine::buttonPressed(int id) {
 
 void DCEngine::update() {
   // speedup
-  // EVERY_N_MILLISECONDS( 1000 ) {
-  //   _speedIndicator--;
-  //   _gameSpeed = round(pow(_preventOverflow(_speedIndicator, _speedIndicatorMin, _speedIndicatorMax), _speedExponent) + 30);
-  //   Serial.println(_gameSpeed);
-  // }
+  EVERY_N_MILLISECONDS( 3000 ) {
+    _speedIndicator--;
+    _gameSpeed = round(pow(_preventOverflow(_speedIndicator, _speedIndicatorMin, _speedIndicatorMax), _speedExponent) + 30);
+    Serial.println(_gameSpeed);
+  }
 
   EVERY_N_MILLIS_I(thistimer, _gameSpeed) {
     // move player with game speed
@@ -173,7 +173,7 @@ void DCEngine::_drawWave(int position, int velocity, CRGB color) {
 }
 
 void DCEngine::_render() {
-  FastLED.setBrightness(20);
+  FastLED.setBrightness(10);
   FastLED.show();
 }
 
