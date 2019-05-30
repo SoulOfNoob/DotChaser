@@ -5,7 +5,7 @@
 
 #define LED_PIN     2
 #define DATA_PIN    4
-#define NUM_LEDS    96
+#define NUM_LEDS    24
 
 const int fieldOffset = 0;
 const int fieldSize = NUM_LEDS - fieldOffset;
