@@ -2,6 +2,7 @@
 #include <EasyButton.h>
 #include <FastLED.h>
 #include <DCEngine.h>
+#include <BLEController.h>
 
 #define LED_PIN     2
 #define DATA_PIN    4
@@ -40,6 +41,10 @@ void setup() {
   //   // Add the callback function to be called when the button is pressed.
   //   buttons[i]->onPressed(callbacks[i]);
   // }
+  BLEDevice::init("ESP32");
+
+  BLEController::init();
+
   Serial.println("Setup OK!");
 	//engine.setConfigMode(1);
 }
@@ -52,5 +57,7 @@ void setup() {
 
 void loop() {
   //readButtons();
+
+  BLEController::loop();
 	engine.update();
 }
