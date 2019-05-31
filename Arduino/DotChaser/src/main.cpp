@@ -28,6 +28,8 @@ DCEngine engine(DATA_PIN, NUM_LEDS, fieldSize, fieldOffset);
 // typedef void (*callbackList[])();
 // callbackList callbacks = { onPressed1, onPressed2, onPressed3, onPressed4 };
 
+static void buttonCB(int i) {engine.buttonPressed(i+1);}
+
 void setup() {
 	// Initialize Serial for debuging purposes.
 	//Serial.begin(115200);
@@ -43,7 +45,8 @@ void setup() {
   // }
   BLEDevice::init("ESP32");
 
-  BLEController::init();
+  BLEController::init(buttonCB);
+
 
   Serial.println("Setup OK!");
 	//engine.setConfigMode(1);

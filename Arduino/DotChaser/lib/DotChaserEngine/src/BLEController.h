@@ -16,7 +16,7 @@
     public:
       BLEController();
 
-      static void init();
+      static void init(void (*callback)(int));
 
       // public variables
       int                             weird;
@@ -36,6 +36,7 @@
       static void scanCompleteCB(BLEScanResults results);
       static bool connectToServer();
       static void loop();
+      static void (*buttonCB)(int buttonID);
   };
 
   class MyClientCallback : public BLEClientCallbacks {

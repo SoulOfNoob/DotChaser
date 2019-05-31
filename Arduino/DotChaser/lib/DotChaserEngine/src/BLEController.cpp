@@ -20,21 +20,23 @@ BLEUUID BLEController::serviceUUID = BLEUUID::fromString("0000FFE0-0000-1000-800
 BLEUUID BLEController::charUUID = BLEUUID::fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
 
 BLERemoteCharacteristic*  BLEController::connections[MAX_CONNECTIONS];
+void (*BLEController::buttonCB)(int buttonID);
 
 BLEController::BLEController() {
 
 }
 
-void BLEController::init() {
+void BLEController::init(void (*callback)(int)) {
+  buttonCB = callback;
   //Serial.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
   //BLEDevice::init("ESP32");
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-  pBLEScan->setInterval(1500);
+  pBLEScan->setInterval(1349);
   pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
-  pBLEScan->start(3, false);
+  pBLEScan->start(5, false);
 }
 
 // public methods
@@ -47,6 +49,7 @@ void BLEController::notifyCallback( BLERemoteCharacteristic* pBLERemoteCharacter
       if(connections[i] == pBLERemoteCharacteristic) {
         Serial.print("Device Number: ");
         Serial.println(i);
+        buttonCB(i);
       }
     }
 }
