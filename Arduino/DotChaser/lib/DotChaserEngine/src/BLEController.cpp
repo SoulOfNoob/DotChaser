@@ -121,7 +121,8 @@ void MyClientCallback::onConnect(BLEClient* pclient) {
 
 void MyClientCallback::onDisconnect(BLEClient* pclient) {
   Serial.println("onDisconnect");
-  //doScan = true;
+  BLEController::connectionCount = 0;
+  BLEController::doScan = true;
   //if(connectionCount > 0) connectionCount--;
 }
 

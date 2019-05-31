@@ -109,7 +109,11 @@ void DCEngine::_addPlayer(int id) {
   Serial.print("Add Player ");
   Serial.println(id);
   _players[id] = new Player();
-  _players[id]->setColor(CHSV(random8(),255,255));
+  if(id == 1){
+    _players[id]->setColor(CRGB::Red);
+  } else if (id == 2) {
+    _players[id]->setColor(CRGB::Blue);
+  }
   _players[id]->setPosition(random(_fieldOffset, _fieldSize + _fieldOffset));
   _drawPlayers();
   //Serial.println(players[button]);
