@@ -28,6 +28,8 @@ BLEController::BLEController() {
 
 void BLEController::init(void (*callback)(int)) {
   buttonCB = callback;
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
   //Serial.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
   //BLEDevice::init("ESP32");
@@ -36,7 +38,7 @@ void BLEController::init(void (*callback)(int)) {
   pBLEScan->setInterval(1349);
   pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
-  pBLEScan->start(5, false);
+  pBLEScan->start(2, false);
 }
 
 // public methods
@@ -111,6 +113,7 @@ void BLEController::loop() {
   } else if(doScan) {
     Serial.println("Stopping scan");
     doScan = false;
+    digitalWrite(LED_PIN, LOW);
   }
 }
 

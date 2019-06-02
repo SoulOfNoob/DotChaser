@@ -9,6 +9,7 @@
 
   #define MAX_PLAYERS 4
   #define MAX_ITEMS 64
+  #define EEPROM_SIZE 3
 
   #include <Arduino.h>
   #include <FastLED.h>
@@ -16,6 +17,7 @@
   #include <Game.h>
   #include <Player.h>
   #include <Item.h>
+  #include <EEPROM.h>
   //#include <BLEController.h>
 
   class DCEngine {
@@ -29,11 +31,16 @@
 
       // public setters
       void    setConfigMode(bool configMode);
+      void    setFieldSize(int fieldSize);
+      void    setFieldOffset(int fieldOffset);
+      void    setBrightness(int brightness);
     private:
       int     _weird;
-      int     _config;
+      int     _num_leds;
+      int     _configMode;
       int     _fieldSize;
       int     _fieldOffset;
+      int     _brightness;
       int     _gameSpeed;         //ToDo: move to Game object
       int     _speedIndicatorMin; //ToDo: move to Game object
       int     _speedIndicatorMax; //ToDo: move to Game object
@@ -43,6 +50,9 @@
       Item*   _items[MAX_ITEMS]     = {nullptr};
       Game*   _game;
       CRGB    _leds[255];
+
+      // private methods
+      void    _doConfig(int id);
 
       // private player methods
       void    _addPlayer(int id);

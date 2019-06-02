@@ -17,9 +17,11 @@ DCEngine::DCEngine(int data_pin, int num_leds, int fieldSize, int fieldOffset) {
   Serial.println("Construct DCEngine");
 
   _weird             = 666;
+  _num_leds          = num_leds;
   _fieldSize         = fieldSize;
   _fieldOffset       = fieldOffset;
-  _config            = 0;
+  _brightness        = 128;
+  _configMode        = 0;
   _gameSpeed         = 100;
   _speedIndicatorMin = 20;
   _speedIndicatorMax = 40;
@@ -30,7 +32,7 @@ DCEngine::DCEngine(int data_pin, int num_leds, int fieldSize, int fieldOffset) {
 
   _stillWeird();
 
-  FastLED.addLeds<WS2812,4,GRB>(_leds, num_leds).setCorrection(TypicalLEDStrip);
+  FastLED.addLeds<WS2812,12,GRB>(_leds, num_leds).setCorrection(TypicalLEDStrip);
 }
 
 // public methods
@@ -47,27 +49,13 @@ void DCEngine::buttonPressed(int id) {
 
   //_drawWave(20, 10, CRGB::Red);
   if( id == 3 ) {
-    _config = _doOverflow(_config + 1, 0, 2);
-    Serial.print(" _config: ");
-    Serial.println(_config);
+    _configMode = _doOverflow(_configMode + 1, 0, 3);
+    Serial.print(" _configMode: ");
+    Serial.println(_configMode);
   }
-  if (_config == 1) {
-    if ( id == 1 ) {
-      _fieldSize--;
-    } else if (id == 2) {
-      _fieldSize++;
-    }
-    Serial.print(" _fieldSize: ");
-    Serial.println(_fieldSize);
-  } else if (_config == 2) {
-    if ( id == 1 ) {
-      _fieldOffset--;
-    } else if (id == 2) {
-      _fieldOffset++;
-    }
-    Serial.print(" _fieldOffset: ");
-    Serial.println(_fieldOffset);
-  } else if ( id != 3 ) {
+  if (_configMode > 0) {
+    _doConfig(id);
+  } else if( id < 3 ) {
     if (_playerExists(id)) {
       _game->playerButtonPressed(id);
     } else {
@@ -91,7 +79,7 @@ void DCEngine::update() {
   thistimer.setPeriod(_gameSpeed);
 
   // but render player as fast as possible
-  if ( _config > 0 ) {
+  if ( _configMode > 0 ) {
     _drawField();
   } else {
     _drawPlayers();
@@ -101,7 +89,51 @@ void DCEngine::update() {
 
 // public setters
 void DCEngine::setConfigMode(bool configMode) {
+  _configMode = configMode;
+}
+void DCEngine::setFieldSize(int fieldSize) {
+  _fieldSize = fieldSize;
+}
+void DCEngine::setFieldOffset(int fieldOffset) {
+  _fieldOffset = fieldOffset;
+}
+void DCEngine::setBrightness(int brightness) {
+  _brightness = brightness;
+}
 
+// private methods
+void DCEngine::_doConfig(int id) {
+  if (_configMode == 1) {
+    if ( id == 4 ) {
+      _brightness = _doOverflow(_brightness + 16, 0, 255);
+    } else if ( id == 5 ) {
+      _brightness = _doOverflow(_brightness - 16, 0, 255);
+    }
+    Serial.print(" _brightness: ");
+    Serial.println(_brightness);
+    EEPROM.write(1, _brightness);
+    EEPROM.commit();
+  } else if (_configMode == 2) {
+    if ( id == 4 ) {
+      _fieldOffset++;
+    } else if ( id == 5 ) {
+      _fieldOffset--;
+    }
+    Serial.print(" _fieldOffset: ");
+    Serial.println(_fieldOffset);
+    EEPROM.write(2, _fieldOffset);
+    EEPROM.commit();
+  } else if (_configMode == 3) {
+    if ( id == 4 ) {
+      _fieldSize = _doOverflow(_fieldSize + 1, 0, _num_leds);
+    } else if (id == 5 ) {
+      _fieldSize = _doOverflow(_fieldSize - 1, 0, _num_leds);
+    }
+    Serial.print(" _fieldSize: ");
+    Serial.println(_fieldSize);
+    EEPROM.write(3, _fieldSize);
+    EEPROM.commit();
+  }
 }
 
 // private player methods
@@ -177,7 +209,7 @@ void DCEngine::_drawWave(int position, int velocity, CRGB color) {
 }
 
 void DCEngine::_render() {
-  FastLED.setBrightness(10);
+  FastLED.setBrightness(_brightness);
   FastLED.show();
 }
 

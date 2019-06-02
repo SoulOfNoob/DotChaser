@@ -8,6 +8,7 @@
 #define _BLECONTROLLER_H
 
   #define MAX_CONNECTIONS 2
+  #define LED_PIN 33
 
   #include <Arduino.h>
   #include <BLEDevice.h>
