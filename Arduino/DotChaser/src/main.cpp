@@ -51,7 +51,7 @@ void IRAM_ATTR ISR_Button_3() {
 typedef void (*ISRList[])();
 ISRList ISRs = { ISR_Button_1, ISR_Button_2, ISR_Button_3 };
 
-static void buttonCB(int i) { engine.buttonPressed(i+1); }
+static void buttonCB(int i) { engine.buttonPressed(i); }
 
 void setup() {
   Serial.println("Start Setup");
@@ -83,7 +83,7 @@ void setup() {
     Serial.println(" from EEPROM");
     engine.setFieldSize(eeprom);
   }
-  
+
   BLEDevice::init("ESP32");
 
   BLEController::init(buttonCB);

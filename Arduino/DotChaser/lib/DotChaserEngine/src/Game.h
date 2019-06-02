@@ -8,8 +8,8 @@
 #ifndef _GAME_H
 #define _GAME_H
 
-  #define MAX_PLAYERS 4
-  #define MAX_ITEMS 64
+  #define MAX_PLAYERS 2
+  #define MAX_ITEMS 24
 
   #include <Arduino.h>
   #include <FastLED.h>

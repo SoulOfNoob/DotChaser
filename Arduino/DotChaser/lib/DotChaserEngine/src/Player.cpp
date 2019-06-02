@@ -12,10 +12,17 @@ Player::Player() {
   _length      = 1;
   _brightness  = 32;
   _points      = 0;
+  _itemCount   = 0;
 }
 
 void Player::changeDirection() {
   _direction = _direction * -1;
+}
+
+void Player::addItem(Item* item) {
+  _items[_itemCount] = item;
+  _items[_itemCount]->setCollected();
+  _itemCount++;
 }
 
 // public getters
@@ -43,7 +50,13 @@ CRGB Player::getColor() {
   return _color;
 }
 
+Item** Player::getItems() {
+  return _items;
+}
 
+int Player::getItemCount() {
+  return _itemCount;
+}
 // public setters
 void Player::setPosition(int position) {
   _position = position;

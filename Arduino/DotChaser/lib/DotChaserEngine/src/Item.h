@@ -13,21 +13,24 @@
 
   class Item {
     public:
-      Item(CRGB color, int position, int value);
+      Item();
 
       // public getters
       int   getPosition();
       int   getValue();
       CRGB  getColor();
+      bool  getCollected();
 
       // public setters
       void  setPosition(int position);
       void  setValue(int value);
       void  setColor(CRGB color);
+      void  setCollected();
     private:
       int   _position;
       int   _value;
       CRGB  _color;
+      bool  _collected;
   };
 
 #endif //_ITEM_H

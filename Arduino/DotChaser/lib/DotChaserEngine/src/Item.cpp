@@ -11,10 +11,8 @@
  * Item implementation
  */
 
-Item::Item(CRGB color, int position, int value) {
-  _color = color;
-  _position = position;
-  _value = value;
+Item::Item() {
+
 }
 
 // public getters
@@ -30,6 +28,10 @@ CRGB Item::getColor() {
   return _color;
 }
 
+bool Item::getCollected() {
+  return _collected;
+}
+
 // public setters
 void Item::setPosition(int position) {
   _position = position;
@@ -41,4 +43,8 @@ void Item::setValue(int value) {
 
 void Item::setColor(CRGB color) {
   _color = color;
+}
+
+void Item::setCollected() {
+  _collected = true;
 }

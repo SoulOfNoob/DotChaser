@@ -26,6 +26,7 @@ Game::Game(Player** players, Item** items, int* fieldSize, int* fieldOffset) {
 
 void Game::playerButtonPressed(int playerID) {
   if (!_checkPlayerCollision(playerID) && !_checkItemCollision(playerID)) {
+    Serial.println("no collision");
     _players[playerID]->changeDirection();
   }
 }
@@ -47,12 +48,19 @@ void Game::_movePlayers() {
 
 bool Game::_checkPlayerCollision(int playerID) {
   //check player Collision
+  Serial.println("check player Collision");
+  Serial.print("ID: ");
+  Serial.println(playerID);
   Player* currentPlayer = _players[playerID];
   //iterate players
+  Serial.println("iterate players");
   for ( int i = 0 ; i < MAX_PLAYERS ; i++ ) {
+    Serial.print("check player ");
+    Serial.println(i);
     Player* enemyPlayer = _players[i];
     //check if enemyPlayer is not currentPlayer and is not empty
     if ( i != playerID && enemyPlayer != nullptr ) {
+      Serial.println("is enemy player");
       //check player positions
       // i suggest collision at +-1 field
       //if ( currentPlayer->getPosition() == enemyPlayer->getPosition() ) {
@@ -60,6 +68,8 @@ bool Game::_checkPlayerCollision(int playerID) {
         _doPlayerCollision(currentPlayer, enemyPlayer);
         return true;
       }
+    } else {
+      Serial.println("is not enemy player");
     }
   }
   return false;
@@ -67,15 +77,16 @@ bool Game::_checkPlayerCollision(int playerID) {
 
 bool Game::_checkItemCollision(int playerID) {
   //check item collision
+  Serial.println("check item Collision");
   Player* currentPlayer = _players[playerID];
   //iterate players
   for ( int i = 0 ; i < MAX_ITEMS ; i++ ) {
     Item* item = _items[i];
     //check if item is not empty
-    if ( item != 0 ) {
+    if ( item != nullptr ) {
       //check player/item positions
       // i suggest collision at +-1 field
-      if ( currentPlayer->getPosition() == item->getPosition() ) {
+      if ( !item->getCollected() && currentPlayer->getPosition() == item->getPosition() ) {
         _doItemCollision(currentPlayer, item);
         return true;
       }
@@ -95,6 +106,7 @@ void Game::_doPlayerCollision(Player* player1, Player* player2) {
 
 void Game::_doItemCollision(Player* player, Item* item) {
   Serial.println("Item Collision detected!!");
+  player->addItem(item);
   //do Collision
 }
 
