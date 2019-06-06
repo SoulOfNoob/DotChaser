@@ -13,6 +13,8 @@ Player::Player() {
   _brightness  = 32;
   _points      = 0;
   _itemCount   = 0;
+  _winner      = false;
+  _looser      = false;
 }
 
 void Player::changeDirection() {
@@ -20,9 +22,24 @@ void Player::changeDirection() {
 }
 
 void Player::addItem(Item* item) {
-  _items[_itemCount] = item;
-  _items[_itemCount]->setCollected();
-  _itemCount++;
+  if( _itemCount < _maxItems ) {
+    _items[_itemCount] = item;
+    _items[_itemCount]->setCollected();
+    _itemCount++;
+  }
+}
+
+Item* Player::removeLastItem() {
+  if ( _itemCount > 1 ) {
+    Serial.print("Removing item: ");
+    Serial.print(_itemCount-1);
+    Item* returnedItem = _items[_itemCount-1];
+    Serial.println(" ... Deleted");
+    _itemCount--;
+    return returnedItem;
+  } else {
+    return nullptr;
+  }
 }
 
 // public getters
@@ -57,6 +74,15 @@ Item** Player::getItems() {
 int Player::getItemCount() {
   return _itemCount;
 }
+
+bool Player::getWinner() {
+  return _winner;
+}
+
+bool Player::getLooser() {
+  return _looser;
+}
+
 // public setters
 void Player::setPosition(int position) {
   _position = position;
@@ -64,4 +90,14 @@ void Player::setPosition(int position) {
 
 void Player::setColor(CRGB color) {
   _color = color;
+}
+
+void Player::setWinner() {
+  _winner = true;
+  _looser = false;
+}
+
+void Player::setLooser() {
+  _looser = true;
+  _winner = false;
 }

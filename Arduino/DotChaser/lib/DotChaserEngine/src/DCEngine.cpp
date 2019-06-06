@@ -22,7 +22,11 @@ DCEngine::DCEngine(int data_pin, int num_leds, int fieldSize, int fieldOffset) {
   _fieldOffset       = fieldOffset;
   _brightness        = 128;
   _configMode        = 0;
-  _gameSpeed         = 100;
+  _gameSpeed         = 180;
+  _maxGameSpeed      = 40;
+  _timeIndicator     = 90000;
+  _indicateTime      = false;
+  _indicateCountdown = 0;
   _speedIndicatorMin = 20;
   _speedIndicatorMax = 40;
   _speedIndicator    = 20;
@@ -61,10 +65,10 @@ void DCEngine::buttonPressed(int id) {
     Serial.println("Check for existence");
     if (_playerExists(id)) {
       Serial.println("exists");
-      //_game->playerButtonPressed(id);
       if (!_checkPlayerCollision(id) && !_checkItemCollision(id)) {
         Serial.println("no collision");
         _players[id]->changeDirection();
+        Serial.println("Direction Changed");
       }
     } else {
       Serial.println("adding");
@@ -75,14 +79,29 @@ void DCEngine::buttonPressed(int id) {
 
 void DCEngine::update() {
   // speedup
-  // EVERY_N_MILLISECONDS( 3000 ) {
-  //   _speedIndicator--;
-  //   _gameSpeed = round(pow(_preventOverflow(_speedIndicator, _speedIndicatorMin, _speedIndicatorMax), _speedExponent) + 30);
-  //   Serial.println(_gameSpeed);
-  // }
+  EVERY_N_MILLISECONDS( 7500 ) {
+    //_speedIndicator--;
+    //_gameSpeed = round(pow(_preventOverflow(_speedIndicator, _speedIndicatorMin, _speedIndicatorMax), _speedExponent) + 30);
+    if( _gameSpeed > _maxGameSpeed ){
+      _gameSpeed -= 10;
+    }
+    Serial.println(_gameSpeed);
+  }
+
+  EVERY_N_MILLISECONDS( 180000 ) {
+    // Game Over
+    _gameOver = true;
+    if( _players[0]->getItemCount() > _players[1]->getItemCount()) {
+      _players[0]->setWinner();
+      _players[1]->setLooser();
+    } else {
+      _players[1]->setWinner();
+      _players[0]->setLooser();
+    }
+  }
 
   // Spawn item
-  EVERY_N_MILLISECONDS( 2000 ) {
+  EVERY_N_MILLISECONDS( 3000 ) {
     if(_itemCount < _maxItems) {
       _addItem(_itemCount);
       _itemCount++;
@@ -92,21 +111,49 @@ void DCEngine::update() {
 
   }
 
+  // EVERY_N_MILLISECONDS( 1000 ) {
+  //   _gameTime + 1000;
+  // }
+
   EVERY_N_MILLIS_I(thistimer, _gameSpeed) {
     // move player with game speed
     _movePlayers();
   }
   thistimer.setPeriod(_gameSpeed);
 
-  // but render player as fast as possible
-  FastLED.clear();
-  if ( _configMode > 0 ) {
-    _drawField();
-  } else {
-    _drawItems();
-    _drawPlayers();
+  EVERY_N_MILLIS_I(newTimer, _timeIndicator) {
+    Serial.print("_timeIndicator: ");
+    Serial.println(_timeIndicator);
+    if(_timeIndicator > 12000) {
+      _timeIndicator = _timeIndicator / 2;
+    } else {
+      _timeIndicator = 1000;
+    }
+    _indicateTime = true;
+    _indicateCountdown = millis();
   }
-  _render();
+  newTimer.setPeriod(_timeIndicator);
+
+  //(1/60fps)*1000=16.67
+  //EVERY_N_MILLISECONDS( 16 ) {
+    // render player with 60 FPS
+    FastLED.clear();
+    if ( _configMode > 0 ) {
+      _drawField(CRGB::Red);
+    } else if( _gameOver ) {
+      _drawField(CRGB::Green);
+      _drawPlayers();
+    } else {
+      if( _indicateTime && millis() - _indicateCountdown <= 200 ) {
+        _drawField(CRGB::Yellow);
+      } else {
+        _indicateTime = false;
+      }
+      _drawItems();
+      _drawPlayers();
+    }
+    _render();
+  //}
 }
 
 // public setters
@@ -186,7 +233,7 @@ void DCEngine::_addPlayer(int id) {
 }
 
 bool DCEngine::_playerExists(int id) {
-  if (_players[id] == 0 && id < _maxPlayers) {
+  if (_players[id] == nullptr && id < _maxPlayers) {
     return false;
   } else {
     return true;
@@ -196,19 +243,14 @@ bool DCEngine::_playerExists(int id) {
 void DCEngine::_movePlayers() {
   for ( int i = 0 ; i < _maxPlayers ; i++ ) {
     Player* player = _players[i];
-    if ( player != 0 ) {
+    if ( player != nullptr ) {
       int newPosition = _doOverflow(player->getPosition() + player->getDirection(), _fieldOffset, _fieldSize - 1 + _fieldOffset);
       player->setPosition(newPosition);
       // move items
       Item** items = player->getItems();
-      // Serial.print("Moving ");
-      // Serial.print(player->getItemCount());
-      // Serial.print(" Items Belonging to: Player");
-      // Serial.println(i);
-
       for( int b = 0 ; b < player->getItemCount() ; b++ ) {
         Item* item = items[b];
-        if (item->getCollected()) {
+        if (item != nullptr && item->getCollected()) {
           int newItemPosition = _doOverflow(player->getPosition() - ((b+1) * player->getDirection()), _fieldOffset, _fieldSize - 1 + _fieldOffset);
           item->setPosition(newItemPosition);
         }
@@ -218,23 +260,28 @@ void DCEngine::_movePlayers() {
 }
 
 // private graphic methods
-void DCEngine::_drawField() {
+void DCEngine::_drawField(CRGB color) {
   for ( int i = _fieldOffset ; i < _fieldSize + _fieldOffset ; i++ ) {
-    _leds[i] = CRGB::Red;
+    _leds[i] = color;
   }
 }
 
 void DCEngine::_drawPlayers() {
   for ( int i = 0 ; i < _maxPlayers ; i++ ) {
     Player* player = _players[i];
-    if ( player != nullptr ) {
+    if ( player != nullptr && !player->getLooser() ) {
       _leds[player->getPosition()] = player->getColor();
       // Draw Player Items
       Item** items = player->getItems();
       for( int b = 0 ; b < player->getItemCount() ; b++ ) {
         Item* item = items[b];
-        if (item->getCollected()) {
-          _leds[item->getPosition()] = item->getColor();
+        if ( item != nullptr ) {
+          if( !_gameOver && _leds[item->getPosition()]) {
+            //white
+            _leds[item->getPosition()] = CRGB::White;
+          } else {
+            _leds[item->getPosition()] = item->getColor();
+          }
         }
       }
     }
@@ -243,8 +290,7 @@ void DCEngine::_drawPlayers() {
 
 void DCEngine::_drawItems() {
   for ( int i = 0 ; i < _itemCount ; i++ ) {
-    if ( _items[i] != 0 && !_items[i]->getCollected() ) {
-    //if ( _items[i] != nullptr ) {
+    if ( _items[i] != nullptr && !_items[i]->getCollected() ) {
       _leds[_items[i]->getPosition()] = _items[i]->getColor();
     }
   }
@@ -317,6 +363,11 @@ bool DCEngine::_checkPlayerCollision(int playerID) {
       //check player positions
       // i suggest collision at +-1 field
       //if ( currentPlayer->getPosition() == enemyPlayer->getPosition() ) {
+      Serial.print("Player1 Pos: ");
+      Serial.println(currentPlayer->getPosition());
+      Serial.print("Player2 Pos: ");
+      Serial.println(enemyPlayer->getPosition());
+
       if ( currentPlayer->getPosition() <= enemyPlayer->getPosition() + _collisionTolerance && currentPlayer->getPosition() >= enemyPlayer->getPosition() - _collisionTolerance ) {
         _doPlayerCollision(currentPlayer, enemyPlayer);
         return true;
@@ -339,7 +390,7 @@ bool DCEngine::_checkItemCollision(int playerID) {
     if ( item != nullptr ) {
       //check player/item positions
       // i suggest collision at +-1 field
-      if ( !item->getCollected() && ( currentPlayer->getPosition() <= item->getPosition() + _collisionTolerance && currentPlayer->getPosition() >= item->getPosition() - _collisionTolerance ) ) {
+      if (!item->getCollected() && ( currentPlayer->getPosition() <= item->getPosition() + _collisionTolerance && currentPlayer->getPosition() >= item->getPosition() - _collisionTolerance ) ) {
         _doItemCollision(currentPlayer, item);
         return true;
       }
@@ -351,15 +402,39 @@ bool DCEngine::_checkItemCollision(int playerID) {
 void DCEngine::_doPlayerCollision(Player* player1, Player* player2) {
   // explosionseffekt
   Serial.println("Player Collision detected!!");
-  //ToDo Getter Setter Methods
-  player1->setColor(CRGB::Green);
-  player2->setColor(CRGB::Red);
-  //do Collision
+
+  Item** items = player2->getItems();
+  int min = player2->getItemCount() / 2;
+  Serial.print("Items to steal: ");
+  Serial.println(min);
+  for( int i = player2->getItemCount() ; i > min ; i-- ) {
+    Item* removedItem = player2->removeLastItem();
+    Serial.print("Item removed: ");
+    Serial.println(i);
+    if(removedItem != nullptr) {
+      player1->addItem(removedItem);
+      Serial.println("Item added");
+    }
+  }
 }
 
 void DCEngine::_doItemCollision(Player* player, Item* item) {
   Serial.println("Item Collision detected!!");
-  player->addItem(item);
+  if( item->getCollected() ) {
+    for( int i = 0 ; i < _maxPlayers ; i++ ) {
+      if( _players[i] != player ) {
+        Item** items = _players[i]->getItems();
+        for( int b = 0 ; b < _players[i]->getItemCount() ; b++ ) {
+          if( items[b] == item ) {
+            items[b] = nullptr;
+            player->addItem(item);
+          }
+        }
+      }
+    }
+  } else {
+    player->addItem(item);
+  }
   //do Collision
 }
 

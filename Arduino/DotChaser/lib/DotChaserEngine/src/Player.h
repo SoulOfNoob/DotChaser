@@ -8,9 +8,6 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
-  #define MAX_PLAYERS 2
-  #define MAX_ITEMS 64
-
   #include <Arduino.h>
   #include <FastLED.h>
   #include <Item.h>
@@ -22,6 +19,7 @@
       // public methods
       void  changeDirection();
       void  addItem(Item* item);
+      Item* removeLastItem();
 
       // public getters
       int    getPosition();
@@ -32,10 +30,14 @@
       CRGB   getColor();
       Item** getItems();
       int    getItemCount();
+      bool   getWinner();
+      bool   getLooser();
 
       // public setters
       void   setPosition(int position);
       void   setColor(CRGB color);
+      void   setWinner();
+      void   setLooser();
 
     private:
       int    _position;
@@ -44,8 +46,11 @@
       int    _brightness;
       int    _points;
       CRGB   _color;
-      Item*  _items[MAX_ITEMS];
+      static const int _maxItems = 255;
+      Item*  _items[_maxItems];
       int    _itemCount;
+      bool   _winner;
+      bool   _looser;
 
   };
 

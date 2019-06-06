@@ -5,7 +5,7 @@
 #include <BLEController.h>
 
 #define DATA_PIN    12
-#define NUM_LEDS    24
+#define NUM_LEDS    100
 
 const byte interruptPins[3] = {32, 27, 13};
 
@@ -61,6 +61,11 @@ void setup() {
   }
 
   EEPROM.begin(5);
+
+  //EEPROM.write(1, 64);
+  //EEPROM.write(2, 0);
+  //EEPROM.write(3, 96);
+  //EEPROM.commit();
 
   int eeprom = EEPROM.read(1);
   if(eeprom != 0) {

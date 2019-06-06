@@ -33,13 +33,14 @@
     private:
       int     _weird;
       static const int _maxPlayers = 2;
-      static const int _maxItems = 15;
+      static const int _maxItems = 50;
       int     _num_leds;
       int     _configMode;
       int     _fieldSize;
       int     _fieldOffset;
       int     _brightness;
       int     _gameSpeed;         //ToDo: move to Game object
+      int     _maxGameSpeed;
       int     _speedIndicatorMin; //ToDo: move to Game object
       int     _speedIndicatorMax; //ToDo: move to Game object
       int     _speedIndicator;    //ToDo: move to Game object
@@ -50,6 +51,10 @@
       int     _itemCount;
       Game*   _game;
       CRGB    _leds[255];
+      bool    _gameOver;
+      int     _timeIndicator;
+      bool    _indicateTime;
+      int     _indicateCountdown;
 
       // private methods
       void    _doConfig(int id);
@@ -61,7 +66,7 @@
       void    _movePlayers();
 
       // private graphic methods
-      void    _drawField();
+      void    _drawField(CRGB color);
       void    _drawPlayers();
       void    _drawItems();
       void    _drawTrace(int position, CRGB color);

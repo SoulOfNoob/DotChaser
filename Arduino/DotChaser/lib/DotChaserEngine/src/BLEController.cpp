@@ -38,7 +38,7 @@ void BLEController::init(void (*callback)(int)) {
   pBLEScan->setInterval(1349);
   pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
-  pBLEScan->start(2, false);
+  pBLEScan->start(5, false);
 }
 
 // public methods
@@ -109,7 +109,7 @@ void BLEController::loop() {
   }
   if(doScan && connectionCount < MAX_CONNECTIONS) {
     Serial.println("Restarting scan");
-    BLEDevice::getScan()->start(3, false);
+    BLEDevice::getScan()->start(5, false);
   } else if(doScan) {
     Serial.println("Stopping scan");
     doScan = false;
